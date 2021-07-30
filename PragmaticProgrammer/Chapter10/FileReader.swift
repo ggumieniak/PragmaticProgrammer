@@ -8,18 +8,49 @@
 import Foundation
 
 
-// TODO: Make a line by line reader, not by entire file in a one moment
 final class FileReader {
-    init() {
-    }
-    
+    private var filePointer: UnsafeMutablePointer<FILE>?
+    var lineByteArrayPointer: UnsafeMutablePointer<CChar>? = nil
+    var lineCap: Int = 0
+    init() {}
+    deinit { closeFile() }
     func openFile(fileName: String) {
         let file = prepareDirectoryOfFile(name: fileName)
         if checkIsFileValid(file: file) {
-            
+            filePointer = createFilePointer(at: file)
+        } else {
+            print("Failed to find an file: \(file)")
         }
     }
     
+    func closeFile() {
+        guard let filePointer = self.filePointer else {
+            print("File wasn't be pointed")
+            return
+        }
+        lineByteArrayPointer = nil
+        lineCap = 0
+        fclose(filePointer)
+    }
+    
+    func readLine() -> String {
+        guard let filePointer = self.filePointer else {
+            return "File wasn't pointed"
+            
+        }
+        
+        let lengthOfLine = getline(&lineByteArrayPointer, &lineCap, filePointer)
+        
+        if checkIfTheFileIsEndAt(line: lengthOfLine) {
+            return String.init(cString:lineByteArrayPointer!)
+        } else {
+            return "End of File."
+        }
+    }
+    
+    private func checkIfTheFileIsEndAt(line: Int) -> Bool {
+        return line > 0 ? true : false
+    }
     private func prepareDirectoryOfFile(name fileName: String) -> URL {
         return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(fileName)
     }
@@ -30,7 +61,10 @@ final class FileReader {
         }
         return false
     }
-    func readLine() -> String {
-        return "Some string"
+    private func createFilePointer(at fileDirectory: URL) -> UnsafeMutablePointer<FILE> {
+        guard let filePointer = fopen(fileDirectory.path, "r") else {
+            preconditionFailure("Failed to open an file \(fileDirectory.absoluteString)")
+        }
+        return filePointer
     }
 }
