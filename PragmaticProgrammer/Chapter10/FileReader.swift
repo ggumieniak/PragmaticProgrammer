@@ -10,8 +10,8 @@ import Foundation
 
 final class FileReader {
     private var filePointer: UnsafeMutablePointer<FILE>?
-    var lineByteArrayPointer: UnsafeMutablePointer<CChar>? = nil
-    var lineCap: Int = 0
+    private var lineByteArrayPointer: UnsafeMutablePointer<CChar>? = nil
+    private var lineCap: Int = 0
     init() {}
     deinit { closeFile() }
     func openFile(fileName: String) {
@@ -51,6 +51,7 @@ final class FileReader {
     private func checkIfTheFileIsEndAt(line: Int) -> Bool {
         return line > 0 ? true : false
     }
+    
     private func prepareDirectoryOfFile(name fileName: String) -> URL {
         return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(fileName)
     }
@@ -61,6 +62,7 @@ final class FileReader {
         }
         return false
     }
+    
     private func createFilePointer(at fileDirectory: URL) -> UnsafeMutablePointer<FILE> {
         guard let filePointer = fopen(fileDirectory.path, "r") else {
             preconditionFailure("Failed to open an file \(fileDirectory.absoluteString)")
