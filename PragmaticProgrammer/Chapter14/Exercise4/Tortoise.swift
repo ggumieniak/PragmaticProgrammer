@@ -8,11 +8,14 @@
 import Foundation
 
 protocol Parser {
-    func getActionFromConsole()
+    func createListOfCommands()
+    func getArgsFromConsole() -> String
+    func createCommand(from input: String) -> Commands
     func separateStringFrom(input: String) -> [String]
     func isCommandExists(command: String) -> Bool
-    func isCommandValid(command: (String,Int)) -> Bool
-    func createCommand(command: (String,Int)) -> Commands
+    func isCommandValid(command: [String]) -> Bool
+    func parseCommand(command: [String]) -> Commands
+    func doesUserUpperPen(command: Commands) -> Bool
 }
 
 enum Pencils {
@@ -29,15 +32,40 @@ enum Commands {
     case Upper
 }
 
-struct Tortoise: Parser {
-    private var listOfCommands: [Commands]?
-    func getActionFromConsole() {
-        if let input = readLine() {
-            let strings = separateStringFrom(input: input).map { $0.lowercased()}
-            print(isCommandExists(command: strings.first!))
-        } else {
-            print("Please input some command")
+struct Tortoise: Parser  {
+    func createListOfCommands() {
+        var command: Commands?
+        repeat {
+            let input = getArgsFromConsole()
+            command = createCommand(from: input)
+        } while(doesUserUpperPen(command: command ?? Commands.Upper))
+    }
+    
+    func getArgsFromConsole() -> String {
+        guard let input = readLine() else {
+            return ""
         }
+        return input
+    }
+    
+    func createCommand(from input: String) -> Commands {
+        <#code#>
+    }
+    
+    func isCommandExists(command: String) -> Bool {
+        <#code#>
+    }
+    
+    func isCommandValid(command: [String]) -> Bool {
+        <#code#>
+    }
+    
+    func parseCommand(command: [String]) -> Commands {
+        <#code#>
+    }
+    
+    func doesUserUpperPen(command: Commands) -> Bool {
+        <#code#>
     }
     
     func separateStringFrom(input: String) -> [String] {
@@ -45,34 +73,4 @@ struct Tortoise: Parser {
         let output = substrings.map { String($0) }
         return output
     }
-    func isCommandExists(command: String) -> Bool {
-        switch command {
-        case "p":
-            return true
-        case "d":
-            return true
-        case "w":
-            return true
-        case "n":
-            return true
-        case "s":
-            return true
-        case "e":
-            return true
-        case "u":
-            return true
-        default:
-            return false
-        }
-    }
-    
-    func isCommandValid(command: (String, Int)) -> Bool {
-        fatalError("Not implemented")
-    }
-    
-    func createCommand(command: (String, Int)) -> Commands {
-        fatalError("Not implemented")
-    }
-    
-    
 }
