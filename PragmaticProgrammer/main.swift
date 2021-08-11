@@ -8,4 +8,4 @@
 import Foundation
 
 let tortoise = Tortoise()
-tortoise.draw()
+tortoise.createListOfCommands()

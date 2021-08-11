@@ -8,14 +8,15 @@
 import Foundation
 
 protocol Parser {
+    var listOfCommands: [Commands]? { get }
     func createListOfCommands()
     func getArgsFromConsole() -> String
     func createCommand(from input: String) -> Commands
     func separateStringFrom(input: String) -> [String]
     func isCommandExists(command: String) -> Bool
-    func isCommandValid(command: [String]) -> Bool
-    func parseCommand(command: [String]) -> Commands
-    func doesUserUpperPen(command: Commands) -> Bool
+//    func isCommandValid(command: [String]) -> Bool
+//    func parseCommand(command: [String]) -> Commands
+//    func doesUserUpperPen(command: Commands) -> Bool
 }
 
 enum Pencils {
@@ -23,6 +24,9 @@ enum Pencils {
 }
 
 enum Commands {
+    enum shortcuts: String, CaseIterable {
+        case p,d,n,w,s,e,u
+    }
     case Pencil(thickness: Pencils)
     case Drop
     case West(width: Int)
@@ -30,15 +34,20 @@ enum Commands {
     case South(width: Int)
     case East(width: Int)
     case Upper
+    case NONE
 }
 
-struct Tortoise: Parser  {
+class Tortoise: Parser  {
+    private(set) var listOfCommands: [Commands]?
+    
     func createListOfCommands() {
-        var command: Commands?
+        print(#function)
+        var command: Commands
         repeat {
             let input = getArgsFromConsole()
             command = createCommand(from: input)
-        } while(doesUserUpperPen(command: command ?? Commands.Upper))
+            listOfCommands?.append(command)
+        } while(/* doesUserUpperPen(command: command) */ false)
     }
     
     func getArgsFromConsole() -> String {
@@ -49,23 +58,13 @@ struct Tortoise: Parser  {
     }
     
     func createCommand(from input: String) -> Commands {
-        <#code#>
-    }
-    
-    func isCommandExists(command: String) -> Bool {
-        <#code#>
-    }
-    
-    func isCommandValid(command: [String]) -> Bool {
-        <#code#>
-    }
-    
-    func parseCommand(command: [String]) -> Commands {
-        <#code#>
-    }
-    
-    func doesUserUpperPen(command: Commands) -> Bool {
-        <#code#>
+        let separatedInput = separateStringFrom(input: input).map { $0.lowercased() }
+        if let command = separatedInput.first, isCommandExists(command: command) {
+            return .Drop
+        } else {
+            print("Nie odnaleziono polecenia")
+            return .NONE
+        }
     }
     
     func separateStringFrom(input: String) -> [String] {
@@ -73,4 +72,24 @@ struct Tortoise: Parser  {
         let output = substrings.map { String($0) }
         return output
     }
+    
+    func isCommandExists(command: String) -> Bool {
+        // TODO: this looks a bit strange
+        let options = Commands.shortcuts.allCases.map { $0.rawValue }
+        return options.contains(command)
+    }
+    
+//    func isCommandValid(command: [String]) -> Bool {
+//        <#code#>
+//    }
+//
+//    func parseCommand(command: [String]) -> Commands {
+//        <#code#>
+//    }
+//
+//    func doesUserUpperPen(command: Commands) -> Bool {
+//        <#code#>
+//    }
+//
+
 }
