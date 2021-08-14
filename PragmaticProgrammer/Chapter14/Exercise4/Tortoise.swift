@@ -8,22 +8,22 @@
 import Foundation
 
 protocol Parser {
-    var listOfCommands: [Commands]? { get }
+    var listOfCommands: [Commands] { get }
     func createListOfCommands()
     func getArgsFromConsole() -> String
     func createCommand(from input: String) -> Commands
     func separateStringFrom(input: String) -> [String]
     func isCommandExists(command: String) -> Bool
-//    func isCommandValid(command: [String]) -> Bool
-//    func parseCommand(command: [String]) -> Commands
-//    func doesUserUpperPen(command: Commands) -> Bool
+    func isCommandValid(commands: [String]) -> Bool
+    func parseCommand(command: [String]) -> Commands
+    func doesUserUpperPen(command: Commands) -> Bool
 }
 
-enum Pencils {
-    case width, thin
+enum Pencils: Int {
+    case width = 1, thin
 }
 
-enum Commands {
+enum Commands: Equatable {
     enum shortcuts: String, CaseIterable {
         case p,d,n,w,s,e,u
     }
@@ -38,7 +38,8 @@ enum Commands {
 }
 
 class Tortoise: Parser  {
-    private(set) var listOfCommands: [Commands]?
+    
+    private(set) var listOfCommands: [Commands] = []
     
     func createListOfCommands() {
         print(#function)
@@ -46,8 +47,12 @@ class Tortoise: Parser  {
         repeat {
             let input = getArgsFromConsole()
             command = createCommand(from: input)
-            listOfCommands?.append(command)
-        } while(/* doesUserUpperPen(command: command) */ false)
+            print(command)
+            listOfCommands.append(command)
+        } while(!doesUserUpperPen(command: command))
+        for item in listOfCommands {
+            print(item)
+        }
     }
     
     func getArgsFromConsole() -> String {
@@ -59,8 +64,8 @@ class Tortoise: Parser  {
     
     func createCommand(from input: String) -> Commands {
         let separatedInput = separateStringFrom(input: input).map { $0.lowercased() }
-        if let command = separatedInput.first, isCommandExists(command: command) {
-            return .Drop
+        if isCommandValid(commands: separatedInput) {
+            return parseCommand(command: separatedInput)
         } else {
             print("Nie odnaleziono polecenia")
             return .NONE
@@ -69,27 +74,54 @@ class Tortoise: Parser  {
     
     func separateStringFrom(input: String) -> [String] {
         let substrings = input.split(separator: " ")
-        let output = substrings.map { String($0) }
+        var output = substrings.map { String($0) }
+        output.append("1")
         return output
     }
     
+    func isCommandValid(commands: [String]) -> Bool {
+        if let command = commands.first, isCommandExists(command: command) {
+            switch command {
+            case "p","n","w","s","e":
+                return commands[1].isInt
+            default:
+                return true
+            }
+        }
+        return false
+    }
+    
     func isCommandExists(command: String) -> Bool {
-        // TODO: this looks a bit strange
         let options = Commands.shortcuts.allCases.map { $0.rawValue }
         return options.contains(command)
     }
     
-//    func isCommandValid(command: [String]) -> Bool {
-//        <#code#>
-//    }
-//
-//    func parseCommand(command: [String]) -> Commands {
-//        <#code#>
-//    }
-//
-//    func doesUserUpperPen(command: Commands) -> Bool {
-//        <#code#>
-//    }
-//
+    func parseCommand(command: [String]) -> Commands {
+        if let value = Int(command[1]), value > 0 {
+            switch command[0] {
+            case "p": return Commands.Pencil(thickness: Pencils(rawValue: value < 2 ? value : 1)!)
+            case "n": return Commands.North(width: value)
+            case "w": return Commands.West(width: value)
+            case "s": return Commands.South(width: value)
+            case "e": return Commands.East(width: value)
+            case "d": return Commands.Drop
+            case "u": return Commands.Upper
+            default:
+                return .NONE
+            }
+        } else {
+            return .NONE
+        }
+    }
+    
+    func doesUserUpperPen(command: Commands) -> Bool {
+        return command == Commands.Upper ? true : false
+    }
+}
 
+extension String {
+    var isInt: Bool {
+        return Int(self) != nil
+    }
+    
 }
